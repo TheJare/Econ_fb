@@ -58,6 +58,33 @@ function RandomFloat(v) { return Math.random()*v; }
 function RandomFloatRange(a,b) { return Math.random()*(b-a)+a; }
 function RandomColor(min, max) { return MakeColor(RandomIntRange(min, max), RandomIntRange(min, max), RandomIntRange(min, max)); }
 
+// http://javascript.info/tutorial/coordinates#the-right-way-elem-getboundingclientrect
+function getOffsetRect(elem) {
+    // (1)
+    var box = elem.getBoundingClientRect()
+    
+    var body = document.body
+    var docElem = document.documentElement
+    
+    // (2)
+    var scrollTop = window.pageYOffset || docElem.scrollTop || body.scrollTop
+    var scrollLeft = window.pageXOffset || docElem.scrollLeft || body.scrollLeft
+    
+    // (3)
+    var clientTop = docElem.clientTop || body.clientTop || 0
+    var clientLeft = docElem.clientLeft || body.clientLeft || 0
+    
+    // (4)
+    var top  = box.top +  scrollTop - clientTop
+    var left = box.left + scrollLeft - clientLeft
+    var bottom = box.bottom +  scrollTop - clientTop
+    var right = box.right + scrollLeft - clientLeft
+    
+    return { top: Math.round(top), left: Math.round(left), bottom: Math.round(bottom), right: Math.round(right), width: box.width, height: box.height,  }
+}
+
+
+
 PlayGame = function() {
 	var ItemDefs = [
 		['it0', { min:1, max:5, color:MakeColor(255,0,0) } ],
@@ -192,10 +219,11 @@ PlayGame = function() {
       cookie     : false, // enable cookies to allow the server to access the session
       xfbml      : true  // parse XFBML
     });
-    //FB.Canvas.setAutoGrow();
+	// Serious fail for non-flash stuff FB.Canvas.setAutoGrow();
 
     FB.getLoginStatus(function(response) {
 	  	logobj(response);
+	  	// Get name and photo, to show api calls and canvas resizing.
 	    FB.api('/me', function(me) {
 		  	logobj(me);
 		  	var uicontainer = document.getElementById('uicontainer');
@@ -206,6 +234,10 @@ PlayGame = function() {
 			  	var photo = document.createElement('img');
 			  	photo.src = pic;
 		  		uicontainer.appendChild(photo);
+			    // Serious fail for non-flash stuff FB.Canvas.setAutoGrow();
+				var ru = getOffsetRect(uicontainer);
+				var rp = getOffsetRect(photo);
+				FB.Canvas.setSize({width:ru.width, height:rp.bottom});
 	  		});
 		});
 	});
