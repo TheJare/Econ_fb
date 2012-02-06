@@ -1,6 +1,4 @@
 # Economy game
-
-## Summary
 Example of a Facebook game built with HTML5 client + NodeJS server
 
 Still very early Work In Progress
