@@ -1,6 +1,9 @@
 {
-    "name": "application-name"
+    "name": "Econ_fb"
   , "version": "0.0.1"
+  , "description": "Example of a Facebook game built with HTML5 client + NodeJS server"
+  , "keywords": []
+  , "author": "Javier Arevalo <jare@iguanademos.com>"
   , "private": true
   , "dependencies": {
       "express": "2.5.2"
