@@ -1,5 +1,11 @@
+# Economy game
 
-Economy game - example of a Facebook game built with HTML5 client + NodeJS server
+## Summary
+
+Example of a Facebook game built with HTML5 client + NodeJS server
+Seriously Work In Progress still
+
+## Credits & Stuff
 
 (C) Copyright by Javier Arevalo in 2012.
   http://www.iguanademos.com/Jare/
