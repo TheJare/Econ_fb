@@ -30,8 +30,11 @@ function ParseSignedRequest(signed_request) {
 
 // Main FB app page
 exports.index = function(req, res) {
-    console.log("Rawr!"
+    console.log("Request received!"
         + "\n  query: " + JSON.stringify(req.query)
+        + "\n  url: " + JSON.stringify(req.url)
+        + "\n  originalUrl: " + JSON.stringify(req.originalUrl)
+        + "\n  connection: " + JSON.stringify(Object.keys(req.connection))
         + "\n  body: " + JSON.stringify(req.body)
         + "\n  method: " + req.method
         + "\n  headers: " + JSON.stringify(req.headers)
@@ -51,7 +54,7 @@ exports.index = function(req, res) {
         // Using the canvas page itself as the login target, it will in turn catch the first if
         // and return to the facebook app page.
         var auth_url = "https://www.facebook.com/dialog/oauth?client_id=" + CONFIG.APP_ID
-            + "&redirect_uri=" + encodeURIComponent(CONFIG.CANVAS_PAGE)
+            + "&redirect_uri=" + encodeURIComponent(/*CONFIG.CANVAS_PAGE*/ (req.connection.encrypted ? 'https' : 'http') + "://"+req.headers.host+req.url)
             + "&scope=email,read_stream";
         res.send("<script> top.location.href='" + auth_url + "'</script>");
         return;
