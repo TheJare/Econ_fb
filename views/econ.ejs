@@ -197,6 +197,17 @@ PlayGame = function() {
 
 	var NextDay = function() {
 		++days;
+
+		$.ajax({
+			url: "<%= server_url %>/<%= facebook_user_id %>/NextDay",
+			dataType: 'text',
+			type: 'POST',
+			data: {},
+			success: function(data, textStatus, jqXHR) {
+				logobj(data);
+			}
+		});
+
 		market.NewDay();
 		DisplayUI();
 	}
@@ -228,7 +239,7 @@ PlayGame = function() {
 		  	logobj(me);
 		  	var uicontainer = document.getElementById('uicontainer');
 		  	var p = document.createElement('p');
-		  	p.innerHTML = "Hi "+ me.first_name + ", welcome to the Economy game.";
+		  	p.innerHTML = "Hi "+ me.first_name + ", welcome to the Economy game. You have played <%= num_sessions %> times before.";
 		  	uicontainer.appendChild(p);
 		  	FB.api('/'+me.id+'/picture', function(pic) {
 			  	var photo = document.createElement('img');

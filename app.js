@@ -31,8 +31,8 @@ app.configure('production', function(){
 // Routes
 
 app.all('/', routes.index);
-app.all('/fb_channel.html', routes.fb_channel);
-app.all('/api/:id/:cmd', routes.api);
+app.get('/fb_channel.html', routes.fb_channel);
+app.post('/api/:id/:cmd', routes.api);
 
 app.listen(process.env.PORT || 3000);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);

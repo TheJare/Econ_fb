@@ -1,5 +1,6 @@
 
 CONFIG = require('./config');
+game = require('../game/game');
 
 // Signed request from Facebook
 function strtr(str, from, to) {
@@ -59,10 +60,17 @@ exports.index = function(req, res) {
         res.send("<script> top.location.href='" + auth_url + "'</script>");
         return;
     }
+
     // We're happily logged in - render the game!
-    res.render('econ', { layout: false,
-        facebook_user_id: request.payload_data.user_id
-      , app_id: CONFIG.APP_ID });
+    game.NewSession(request.payload_data.user_id, function(user) {
+        res.render('econ', { layout: false,
+            facebook_user_id: request.payload_data.user_id
+          , app_id: CONFIG.APP_ID
+          , server_url: CONFIG.SERVER_URL
+          , session_id: user.session_id
+          , num_sessions: user.num_sessions
+        });
+    });
 };
 
 // Facebook channel file
