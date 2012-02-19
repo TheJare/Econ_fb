@@ -1,7 +1,15 @@
-var mongodb = require('mongodb'),
-  Db = mongodb.Db,
-  Connection = mongodb.Connection,
-  Server = mongodb.Server;
+/*
+(C) Copyright by Javier Arevalo in 2012.
+    http://www.iguanademos.com/Jare/
+    @TheJare on twitter
+    https://github.com/TheJare
+Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
+*/
+
+var mongodb = require('mongodb')
+  , Db = mongodb.Db
+  , Connection = mongodb.Connection
+  , Server = mongodb.Server;
 
 var util = require('util');
 
