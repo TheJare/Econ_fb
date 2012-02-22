@@ -13,6 +13,8 @@ var mongodb = require('mongodb')
 
 var util = require('util');
 
+var Rng = require('../lib/rng');
+
 var db = null;
 
 var nextSessionId = 1;
@@ -47,10 +49,14 @@ var NewSession = exports.NewSession = function(SNUserId, cb) {
 	        	};
 
 	        	if (err || !user) {
-	        		var newUser = {sn_id:SNUserId, num_sessions:0};
-	        		collection.insert(newUser, function(err, user) {
+	        		var newUser = {
+		        		sn_id:SNUserId,
+		        		num_sessions:0,
+		        		seed: Rng.LCG.newSeed()
+		        	};
+	        		collection.insert(newUser, function(err, n) {
 	        			if (!err)
-		        			onUser(user);
+		        			onUser(newUser);
 	        		});
 	        	} else {
 	        		onUser(user);

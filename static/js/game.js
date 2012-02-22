@@ -46,7 +46,22 @@ function getOffsetRect(elem) {
 
 
 
-PlayGame = function(server_url, facebook_user_id) {
+EnterGame = function(server_url, facebook_user_id) {
+	LoadGame(function(v) { PlayGame(server_url, facebook_user_id, v);});
+}
+
+LoadGame = function(cb) {
+	var v = $.ajax({
+		url: 'ejs/uiMarketBuySellLine.ejs',
+		dataType: 'text',
+		type: 'GET',
+		success: function(data, textStatus, jqXHR) {
+			cb({ ejsBuySellItem : new EJS({text:data}) });
+		}
+	});
+}
+
+PlayGame = function(server_url, facebook_user_id, vars) {
 	var ItemDefs = [
 		['it0', { min:1, max:5, color:MakeColor(255,0,0) } ],
 		['it1', { min:3, max:10, color:MakeColor(255,0,255) } ],
@@ -124,18 +139,18 @@ PlayGame = function(server_url, facebook_user_id) {
 			var i = ItemDefs[ii][0];
 			var itemDef = ItemDefs[ii][1];
 			var pct = Math.floor((market.exchange[i] - itemDef.min) * 100 / (itemDef.max-itemDef.min));
-			var d = $('<div class="itemmarketline" style="color:' + itemDef.color + '">'
-				+ '<span class="itemmarketnum">' + pct + '%</span>'
-				+ '<span class="itemmarketnum">' + market.exchange[i] + '</span>'
-				+ '<span class="itemmarketnum">(' + (player.inventory[i] || 0) + ')</span>'
-				+ '<span id="add" class="button itemmarketbtn">+</span><span id="sub" class="button itemmarketbtn">-</span>'
-				+ '</div>');
-			var dadd = $("#add", d);
-			var dsub = $("#sub", d);
+			var d = $(vars.ejsBuySellItem.render({
+				color: itemDef.color,
+				pct: pct,
+				xchg: market.exchange[i],
+				n: (player.inventory[i] || 0)
+			}));
+			var dadd = d.find("#add");
+			var dsub = d.find("#sub");
 			// Function to make a closure bound to the current value of loop variable
-			var MakeBuyHandler = function(i, n) { return function() {BuyItemEvent(i, n);};}
-			dadd.click( MakeBuyHandler(i, 1) );
-			dsub.click( MakeBuyHandler(i,-1) );
+			var MakeBuyHandler = function(i, n) { return function(e) {BuyItemEvent(i, n);e.preventDefault();};}
+			dadd.on('mousedown', MakeBuyHandler(i, 1) );
+			dsub.on('mousedown', MakeBuyHandler(i,-1) );
 			marketdiv.append(d);
 
 			var hist = [];
