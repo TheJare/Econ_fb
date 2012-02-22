@@ -1,8 +1,8 @@
 /*
 (C) Copyright by Javier Arevalo in 2012.
-    http://www.iguanademos.com/Jare/
-    @TheJare on twitter
-    https://github.com/TheJare
+	http://www.iguanademos.com/Jare/
+	@TheJare on twitter
+	https://github.com/TheJare
 Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
 */
 
@@ -21,27 +21,27 @@ function RandomColor(min, max) { return MakeColor(RandomIntRange(min, max), Rand
 
 // http://javascript.info/tutorial/coordinates#the-right-way-elem-getboundingclientrect
 function getOffsetRect(elem) {
-    // (1)
-    var box = elem.getBoundingClientRect()
-    
-    var body = document.body
-    var docElem = document.documentElement
-    
-    // (2)
-    var scrollTop = window.pageYOffset || docElem.scrollTop || body.scrollTop
-    var scrollLeft = window.pageXOffset || docElem.scrollLeft || body.scrollLeft
-    
-    // (3)
-    var clientTop = docElem.clientTop || body.clientTop || 0
-    var clientLeft = docElem.clientLeft || body.clientLeft || 0
-    
-    // (4)
-    var top  = box.top +  scrollTop - clientTop
-    var left = box.left + scrollLeft - clientLeft
-    var bottom = box.bottom +  scrollTop - clientTop
-    var right = box.right + scrollLeft - clientLeft
-    
-    return { top: Math.round(top), left: Math.round(left), bottom: Math.round(bottom), right: Math.round(right), width: box.width, height: box.height,  }
+	// (1)
+	var box = elem.getBoundingClientRect()
+	
+	var body = document.body
+	var docElem = document.documentElement
+	
+	// (2)
+	var scrollTop = window.pageYOffset || docElem.scrollTop || body.scrollTop
+	var scrollLeft = window.pageXOffset || docElem.scrollLeft || body.scrollLeft
+	
+	// (3)
+	var clientTop = docElem.clientTop || body.clientTop || 0
+	var clientLeft = docElem.clientLeft || body.clientLeft || 0
+	
+	// (4)
+	var top  = box.top +  scrollTop - clientTop
+	var left = box.left + scrollLeft - clientLeft
+	var bottom = box.bottom +  scrollTop - clientTop
+	var right = box.right + scrollLeft - clientLeft
+	
+	return { top: Math.round(top), left: Math.round(left), bottom: Math.round(bottom), right: Math.round(right), width: box.width, height: box.height,  }
 }
 
 

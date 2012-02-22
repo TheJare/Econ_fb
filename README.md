@@ -14,6 +14,6 @@ Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 ## Attributions
 Based on my hazy memory of a little Flash experiment I saw a while ago, not sure who made it (could be 2D Boy?)
 
-- Client: Uses jQuery and Flot
-- Server: NodeJS, Express and EJS. Probably MongoDB soon for game persistance
+- Client: Uses jQuery, Flot and EJS
+- Server: NodeJS, Express, EJS and MongoDB (experimental)
 - And of course Facebook docs and JS SDK.

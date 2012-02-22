@@ -1,51 +1,51 @@
 <!DOCTYPE html>
 <html> <!-- manifest="cache.manifest">-->
 <!-- (C) Copyright by Javier Arevalo in 2012.
-       http://www.iguanademos.com/Jare/
-       @TheJare on twitter
-       https://github.com/TheJare
+	   http://www.iguanademos.com/Jare/
+	   @TheJare on twitter
+	   https://github.com/TheJare
 	 Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
-     Uses jQuery and Flot.
-     Based on my hazy memory of a little Flash experiment I saw a while ago, not sure who made it (could be 2D Boy?)
-     Feel free to copy, distribute or modify as you wish, but please credit the original source.
+	 Uses jQuery and Flot.
+	 Based on my hazy memory of a little Flash experiment I saw a while ago, not sure who made it (could be 2D Boy?)
+	 Feel free to copy, distribute or modify as you wish, but please credit the original source.
 -->
 <head>
-    <title>Economy game</title>
-    <meta name="apple-mobile-web-app-capable" content="yes"/>
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-    <meta name="viewport" content="width=device-width, maximum-scale=1.0, initial-scale=1.0, user-scalable=no"/>
-    <style type="text/css">
-    	body { background-color:black; color:white;}
-        .interactive { -webkit-tap-highlight-color: rgba(0,0,0,0); }
-        .fullscreen { position:absolute; top:0; left:0; display: block; padding: 0; border: 0; margin: 0; overflow: hidden; width:100%; height:100%; }
-        .button { background: #CCC; color: #404; border: 1px solid #000; font-family: 'Helvetica Neue',Arial,Helvetica,sans-serif; font-weight: bold;
-                vertical-align: top; padding: 2px; border-radius: 3px; outline: none; text-decoration: none; margin: 3px; box-shadow:inset 0 0 3px #000000; }
-        .button:hover { background: #FFF; color: #A0A; cursor:pointer;}
-        #marketcontainer { padding:12px;}
-        #market { display:table; float:left; padding:12px;}
-        #marketgraph { float:left; width:500px; height:250px;}
-        .itemmarketline { display:table-row;}
-        .itemmarketnum { display:table-cell; padding:0 1em; text-align:right;}
-        .itemmarketbtn { display:table-cell; padding: 0 0.5em; }
+	<title>Economy game</title>
+	<meta name="apple-mobile-web-app-capable" content="yes"/>
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+	<meta name="viewport" content="width=device-width, maximum-scale=1.0, initial-scale=1.0, user-scalable=no"/>
+	<style type="text/css">
+		body { background-color:black; color:white;}
+		.interactive { -webkit-tap-highlight-color: rgba(0,0,0,0); }
+		.fullscreen { position:absolute; top:0; left:0; display: block; padding: 0; border: 0; margin: 0; overflow: hidden; width:100%; height:100%; }
+		.button { background: #CCC; color: #404; border: 1px solid #000; font-family: 'Helvetica Neue',Arial,Helvetica,sans-serif; font-weight: bold;
+				vertical-align: top; padding: 2px; border-radius: 3px; outline: none; text-decoration: none; margin: 3px; box-shadow:inset 0 0 3px #000000; }
+		.button:hover { background: #FFF; color: #A0A; cursor:pointer;}
+		#marketcontainer { padding:12px;}
+		#market { display:table; float:left; padding:12px;}
+		#marketgraph { float:left; width:500px; height:250px;}
+		.itemmarketline { display:table-row;}
+		.itemmarketnum { display:table-cell; padding:0 1em; text-align:right;}
+		.itemmarketbtn { display:table-cell; padding: 0 0.5em; }
 
-        #splash { position: fixed; top: 50%; left: 50%; margin-top: -200px; margin-left: -380px; }
-    </style>
+		#splash { position: fixed; top: 50%; left: 50%; margin-top: -200px; margin-left: -380px; }
+	</style>
 </head>
 <body class="fullscreen">
 <div id="splash">
 	<img src="images/splash.png" />
 </div>
 <div id="uicontainer" class="fullscreen interactive" style="display:none">
-    <div id="marketcontainer">
-    	<div id="market"></div>
-    	<div id="marketgraph"></div>
-    	<div style="clear:both"></div>
+	<div id="marketcontainer">
+		<div id="market"></div>
+		<div id="marketgraph"></div>
+		<div style="clear:both"></div>
 	</div>
-    <div id="summary"></div>
-    <span id="nextday" class="button">&nbsp;Next day&nbsp;</span>
-    <!-- we already have the user id, the server gave it to us. It would work like this:
-    <p>User: <%= facebook_user_id %></span>
-    -->
+	<div id="summary"></div>
+	<span id="nextday" class="button">&nbsp;Next day&nbsp;</span>
+	<!-- we already have the user id, the server gave it to us. It would work like this:
+	<p>User: <%= facebook_user_id %></span>
+	-->
 </div>
 
 <script type="text/javascript" src="//code.jquery.com/jquery-1.7.1.min.js"></script>
@@ -58,9 +58,9 @@
 <script type="text/javascript" src="js/client_fb.js"></script>
 <script>
 FB_Init('<%= app_id %>', 'fb_channel.html', function(me) {
-  	var uicontainer = document.getElementById('uicontainer');
-  	var p = document.createElement('p');
-  	p.innerHTML = "Hi "+ me.first_name + ", welcome to the Economy game. You have played <%= num_sessions %> times before.";
+	var uicontainer = document.getElementById('uicontainer');
+	var p = document.createElement('p');
+	p.innerHTML = "Hi "+ me.first_name + ", welcome to the Economy game. You have played <%= num_sessions %> times before.";
 	uicontainer.appendChild(p);
 	$("#splash").fadeOut('slow', function() {
 		$(uicontainer).show();
@@ -68,11 +68,11 @@ FB_Init('<%= app_id %>', 'fb_channel.html', function(me) {
 		EnterGame('<%= server_url %>', me.id); // '<%= facebook_user_id %>'
 		FB.Canvas.setDoneLoading();
 
-	  	FB.api('/'+me.id+'/picture', function(pic) {
-		  	var photo = document.createElement('img');
-		  	photo.src = pic;
-	  		uicontainer.appendChild(photo);
-		    FB.Canvas.setAutoGrow(false);
+		FB.api('/'+me.id+'/picture', function(pic) {
+			var photo = document.createElement('img');
+			photo.src = pic;
+			uicontainer.appendChild(photo);
+			FB.Canvas.setAutoGrow(false);
 			var ru = getOffsetRect(uicontainer);
 			var rp = getOffsetRect(photo);
 			FB.Canvas.setSize({width:ru.width, height:rp.bottom});
