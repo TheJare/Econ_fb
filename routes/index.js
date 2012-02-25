@@ -10,7 +10,25 @@ var CONFIG = require('./config')
   , game = require('../game/game')
   , FB = require('../lib/server_fb');
 
+var util = require('util');
+
 // Main FB app page
+
+var RenderGame = function(res, user) {
+	try {
+		res.render('econ', {
+			layout: false
+		  , facebook_user_id: user.sn_id
+		  , app_id: CONFIG.APP_ID
+		  , server_url: CONFIG.SERVER_URL
+		  , session_id: user.session_id
+		  , num_sessions: user.num_sessions
+		});
+	} catch (e) {
+		res.send("Something terrible happened in render:(\n" + util.inspect(e));
+	}
+};
+
 exports.index = function(req, res) {
 	/*console.log("Request received!"
 		+ "\n  query: " + JSON.stringify(req.query)
@@ -28,15 +46,11 @@ exports.index = function(req, res) {
 		return;
 
 	// We're happily logged in - render the game!
-	game.NewSession(payload.user_id, function(user) {
-		res.render('econ', { layout: false,
-			facebook_user_id: payload.user_id
-		  , app_id: CONFIG.APP_ID
-		  , server_url: CONFIG.SERVER_URL
-		  , session_id: user.session_id
-		  , num_sessions: user.num_sessions
-		});
-	});
+	try {
+		game.NewSession(payload.user_id, function(user) { RenderGame(res, user); });
+	} catch (e) {
+		res.send("Something terrible happened in NewSession:(\n" + util.inspect(e));
+	}
 };
 
 exports.fb_channel = FB.ChannelFile;

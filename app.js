@@ -8,6 +8,7 @@ Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 
 var express = require('express')
 	, routes = require('./routes')
+	, game = require('./game/game')
 
 var app = module.exports = express.createServer();
 
@@ -36,5 +37,12 @@ app.all('/', routes.index); // Canvas app page
 app.get('/fb_channel.html', routes.fb_channel); // Facebook channel file
 app.post('/api/:id/:cmd', routes.api); // Server API
 
-app.listen(process.env.PORT || 3000);
-console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+// Connect to database and run server
+// Need some database conection recovery inside as well
+game.InitDb(function(err, db) {
+	if (err) {
+		console.log("Warning: No database available.\n" + err);
+	}
+	app.listen(process.env.PORT || 3000);
+	console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+});
