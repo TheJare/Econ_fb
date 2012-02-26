@@ -28,61 +28,32 @@
 		.itemmarketnum { display:table-cell; padding:0 1em; text-align:right;}
 		.itemmarketbtn { display:table-cell; padding: 0 0.5em; }
 
-		#splash { position: fixed; top: 50%; left: 50%; margin-top: -200px; margin-left: -380px; }
+		.splashimg { position: fixed; top: 50%; left: 50%; }
 	</style>
 </head>
 <body class="fullscreen">
-<div id="splash">
-	<img src="images/splash.png" />
-</div>
-<div id="uicontainer" class="fullscreen interactive" style="display:none">
-	<div id="marketcontainer">
-		<div id="market"></div>
-		<div id="marketgraph"></div>
-		<div style="clear:both"></div>
-	</div>
-	<div id="summary"></div>
-	<span id="nextday" class="button">&nbsp;Next day&nbsp;</span>
-	<!-- we already have the user id, the server gave it to us. It would work like this:
-	<p>User: <%= facebook_user_id %></span>
-	-->
+<div id="uicontainer" class="fullscreen interactive">
+	<img id="splashimg" class="splashimg" src="images/splash.png" style="margin-top: -200px; margin-left:-380px;" />
 </div>
 
 <script type="text/javascript" src="//code.jquery.com/jquery-1.7.1.min.js"></script>
 <!-- Flot kindly provided by https://github.com/flot/flot and minified with http://jscompress.com/  -->
 <script type="text/javascript" src="js/jquery.flot.min.js"></script>
+<!-- EJS kindly provided by http://code.google.com/p/embeddedjavascript/  -->
 <script type="text/javascript" src="js/ejs_production.js"></script>
+<!-- Async kindly provided by https://github.com/caolan/async  -->
+<script type="text/javascript" src="js/async.min.js"></script>
 
 <script type="text/javascript" src="js/game.js"></script>
+<script type="text/javascript" src="js/menu.js"></script>
 
 <script type="text/javascript" src="js/client_fb.js"></script>
 <script>
-FB_Init('<%= app_id %>', 'fb_channel.html', function(me) {
-	var uicontainer = document.getElementById('uicontainer');
-	var p = document.createElement('p');
-	p.innerHTML = "Hi "+ me.first_name + ", welcome to the Economy game. You have played <%= num_sessions %> times before.";
-	uicontainer.appendChild(p);
-	$("#splash").fadeOut('slow', function() {
-		$(uicontainer).show();
-		// Go!
-		EnterGame('<%= server_url %>', me.id); // '<%= facebook_user_id %>'
-		FB.Canvas.setDoneLoading();
-
-		FB.api('/'+me.id+'/picture', function(pic) {
-			var photo = document.createElement('img');
-			photo.src = pic;
-			uicontainer.appendChild(photo);
-			FB.Canvas.setAutoGrow(false);
-			var ru = getOffsetRect(uicontainer);
-			var rp = getOffsetRect(photo);
-			FB.Canvas.setSize({width:ru.width, height:rp.bottom});
-		});
-	});
+var CONFIG = <%= CONFIG %>;
+FB_Init(CONFIG.app_id, 'fb_channel.html', function(me) {
+	CONFIG.me = me;
+	EnterMenu();
 });
-
-// Go!
-//PlayGame('<%= server_url %>', '<%= facebook_user_id %>');
-//FB.Canvas.setDoneLoading();
 </script>
 
 </body>

@@ -17,12 +17,14 @@ var util = require('util');
 var RenderGame = function(res, user) {
 	try {
 		res.render('econ', {
-			layout: false
-		  , facebook_user_id: user.sn_id
-		  , app_id: CONFIG.APP_ID
-		  , server_url: CONFIG.SERVER_URL
-		  , session_id: user.session_id
-		  , num_sessions: user.num_sessions
+			layout: false,
+			CONFIG: util.inspect({
+		  		sn_id: user.sn_id
+			  , app_id: CONFIG.APP_ID
+			  , server_url: CONFIG.SERVER_URL
+			  , session_id: user.session_id
+			  , num_sessions: user.num_sessions
+			})
 		});
 	} catch (e) {
 		res.send("Something terrible happened in render:(\n" + util.inspect(e));

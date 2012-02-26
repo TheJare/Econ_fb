@@ -14,6 +14,6 @@ Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 ## Attributions
 Based on my hazy memory of a little Flash experiment I saw a while ago, not sure who made it (could be 2D Boy?)
 
-- Client: Uses jQuery, Flot and EJS
+- Client: Uses jQuery, Flot, async, EJS
 - Server: NodeJS, Express, EJS and MongoDB (experimental)
 - And of course Facebook docs and JS SDK.

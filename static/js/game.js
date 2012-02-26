@@ -44,24 +44,59 @@ function getOffsetRect(elem) {
 	return { top: Math.round(top), left: Math.round(left), bottom: Math.round(bottom), right: Math.round(right), width: box.width, height: box.height,  }
 }
 
-
-
-EnterGame = function(server_url, facebook_user_id) {
-	LoadGame(function(v) { PlayGame(server_url, facebook_user_id, v);});
-}
-
-LoadGame = function(cb) {
+// Utilities to load templates.
+LoadEJSTemplate = function(name, res, cb) {
+	res = res || {};
 	var v = $.ajax({
-		url: 'ejs/uiMarketBuySellLine.ejs',
+		url: 'ejs/ui' + name + '.ejs',
 		dataType: 'text',
 		type: 'GET',
 		success: function(data, textStatus, jqXHR) {
-			cb({ ejsBuySellItem : new EJS({text:data}) });
+			res['ejs'+name] = new EJS({text:data});
+			cb(null, res);
 		}
 	});
 }
+LoadEJSTemplateArray = function(templates, cb) {
+	var vars = {};
+	async.map(templates,
+		function(it, callback) { LoadEJSTemplate(it, vars, callback); },
+		function(err, res) { cb(err, vars); }
+	);
+}
 
-PlayGame = function(server_url, facebook_user_id, vars) {
+// ------------------------------------------------
+// Game
+// ------------------------------------------------
+EnterGame = function() {
+	async.series([
+		function(callback) {
+			LoadGame(function(err, vars) { CONFIG.vars = vars; callback(err, vars);});
+		},
+		function(callback) {
+			$("#uicontainer").fadeOut('slow', function() { callback(null); });
+		}
+	], function(err, results) {
+		RunGame();
+	});
+}
+
+LoadGame = function(cb) {
+	LoadEJSTemplateArray(['MarketBuySellLine', 'MarketMain'], cb);
+}
+
+RunGame = function() {
+	var uicontainer = document.getElementById('uicontainer');
+	CONFIG.vars.MAX_MONEY = 10000;
+	CONFIG.vars.MAX_DAYS = 30;
+	CONFIG.vars.ejsMarketMain.update(uicontainer, {});
+	$(uicontainer).show();
+	/*var ru = getOffsetRect(uicontainer);
+	var rp = getOffsetRect(photo);
+	FB.Canvas.setSize({width:ru.width, height:rp.bottom});*/
+
+	CONFIG.vars.hasWon = false;
+
 	var ItemDefs = [
 		['it0', { min:1, max:5, color:MakeColor(255,0,0) } ],
 		['it1', { min:3, max:10, color:MakeColor(255,0,255) } ],
@@ -123,10 +158,19 @@ PlayGame = function(server_url, facebook_user_id, vars) {
 
 	var BuyItemEvent = function(i, v) {
 		player.AddItem(market, i, v);
+		if (!CONFIG.vars.hasWon) {
+			if (player.money >= CONFIG.vars.MAX_MONEY) {
+				CONFIG.vars.hasWon = true;
+				$('#winMessage').show();
+			}
+		}
 		setTimeout(DisplayUI, 1);
 	}
 
 	var DisplayUI = function() {
+		if (days >= CONFIG.vars.MAX_DAYS)
+			$('#nextday').hide();
+
 		var marketdiv = $("#market");
 		var summarydiv = $("#summary");
 		marketdiv.empty();
@@ -139,7 +183,7 @@ PlayGame = function(server_url, facebook_user_id, vars) {
 			var i = ItemDefs[ii][0];
 			var itemDef = ItemDefs[ii][1];
 			var pct = Math.floor((market.exchange[i] - itemDef.min) * 100 / (itemDef.max-itemDef.min));
-			var d = $(vars.ejsBuySellItem.render({
+			var d = $(CONFIG.vars.ejsMarketBuySellLine.render({
 				color: itemDef.color,
 				pct: pct,
 				xchg: market.exchange[i],
@@ -175,7 +219,7 @@ PlayGame = function(server_url, facebook_user_id, vars) {
 		++days;
 
 		$.ajax({
-			url: server_url+'/'+facebook_user_id+'/NextDay',
+			url: CONFIG.server_url+'/'+CONFIG.sn_id+'/NextDay',
 			dataType: 'text',
 			type: 'POST',
 			data: {},

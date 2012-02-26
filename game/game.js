@@ -40,6 +40,8 @@ var InitDb = exports.InitDb = function(cb) {
 	});
 }
 
+// --------------------------
+// Start a new session for new or existing user
 var NewSession = exports.NewSession = function(SNUserId, cb) {
 	var newUser = {
 		sn_id:SNUserId,
@@ -71,6 +73,7 @@ var NewSession = exports.NewSession = function(SNUserId, cb) {
 			};
 
 			if (err || !user) {
+				console.log("User not found, trying to insert....\n" + err);
 				collection.insert(newUser, function(err, n) {
 					if (err) {
 						// Fake session without DB access.
