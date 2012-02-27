@@ -14,14 +14,15 @@ var util = require('util');
 
 // Main FB app page
 
-var RenderGame = function(res, user) {
+var RenderGame = function(req, res, user) {
 	try {
+		var usingHTTPS = (req.connection.encrypted || req.headers['x-forwarded-proto'] == 'https');
 		res.render('econ', {
 			layout: false,
 			CONFIG: util.inspect({
 		  		sn_id: user.sn_id
 			  , app_id: CONFIG.APP_ID
-			  , server_url: CONFIG.SERVER_URL
+			  , server_url: (usingHTTPS? 'https' : 'http') + "://"+req.headers.host + '/api'
 			  , session_id: user.session_id
 			  , num_sessions: user.num_sessions
 			})
@@ -49,7 +50,7 @@ exports.index = function(req, res) {
 
 	// We're happily logged in - render the game!
 	try {
-		game.NewSession(payload.user_id, function(user) { RenderGame(res, user); });
+		game.NewSession(payload.user_id, function(user) { RenderGame(req, res, user); });
 	} catch (e) {
 		res.send("Something terrible happened in NewSession:(\n" + util.inspect(e));
 	}

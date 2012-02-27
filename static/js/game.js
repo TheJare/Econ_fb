@@ -68,6 +68,21 @@ LoadEJSTemplateArray = function(templates, cb) {
 // ------------------------------------------------
 // Game
 // ------------------------------------------------
+
+ServerCommand = function(cmd, body, cb) {
+	body = body || {};
+	$.ajax({
+		url: CONFIG.server_url+'/'+CONFIG.sn_id+'/' + cmd,
+		dataType: 'text',
+		type: 'POST',
+		data: body,
+		success: function(data, textStatus, jqXHR) {
+			logobj(data);
+			if (cb) cb(null, data);
+		}
+	});
+}
+
 EnterGame = function() {
 	async.series([
 		function(callback) {
@@ -86,14 +101,11 @@ LoadGame = function(cb) {
 }
 
 RunGame = function() {
+	ServerCommand('StartGame');
 	var uicontainer = document.getElementById('uicontainer');
 	CONFIG.vars.MAX_MONEY = 10000;
 	CONFIG.vars.MAX_DAYS = 30;
 	CONFIG.vars.ejsMarketMain.update(uicontainer, {});
-	$(uicontainer).show();
-	/*var ru = getOffsetRect(uicontainer);
-	var rp = getOffsetRect(photo);
-	FB.Canvas.setSize({width:ru.width, height:rp.bottom});*/
 
 	CONFIG.vars.hasWon = false;
 
@@ -218,15 +230,7 @@ RunGame = function() {
 	var NextDay = function() {
 		++days;
 
-		$.ajax({
-			url: CONFIG.server_url+'/'+CONFIG.sn_id+'/NextDay',
-			dataType: 'text',
-			type: 'POST',
-			data: {},
-			success: function(data, textStatus, jqXHR) {
-				logobj(data);
-			}
-		});
+		ServerCommand('NextDay');
 
 		market.NewDay();
 		DisplayUI();
@@ -235,6 +239,15 @@ RunGame = function() {
 	// Hook controls, display the game and start!
 	$("#nextday").click(NextDay);
 	DisplayUI();
+	$(uicontainer).show();
+	/*var ru = getOffsetRect(uicontainer);
+	var rp = getOffsetRect(photo);
+	FB.Canvas.setSize({width:ru.width, height:rp.bottom});*/
 
 };
+
+FinishGame = function() {
+	ServerCommand('FinishGame');
+	EnterMenu();
+}
 

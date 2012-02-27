@@ -5,7 +5,7 @@ Still very early Work In Progress.
 
 You can try it locally even without a mongodb, just by running 'node app.js' to start the server then going to
 http://apps.facebook.com/239838146090075/ on Facebook without secure browsing. That app's canvas is configured 
-to load from http://localhost:3000/
+to load from http://localhost:3000/, or https://localhost:3443/ for SSL
 
 ## Credits & License
 (C) Copyright by Javier Arevalo in 2012.
