@@ -179,6 +179,43 @@ RunGame = function() {
 		setTimeout(DisplayUI, 1);
 	}
 
+	var HighlightItem = function(itemIndex, enabled) {
+		var line = $("#itemmarketline_"+itemIndex);
+		line.css("background-color", enabled?"#124":"#000");
+	};
+
+	var lastHighlightedItem = null;
+	var lastHighlightedGraph = null;
+	var PlotHoverEvent = function (event, pos, item) {
+		if (lastHighlightedItem !== null) {
+			HighlightItem(lastHighlightedItem, false);
+			lastHighlightedItem = null;
+		}
+		if (item) {
+			HighlightItem(item.seriesIndex, true);
+			lastHighlightedItem = item.seriesIndex;
+		}
+	}
+	var ItemHoverEvent = function (itemIndex, percents) {
+		if (itemIndex !== null) {
+			var localpercents = [percents[itemIndex]];
+			RenderGraph(localpercents);
+		} else {
+			RenderGraph(percents);
+		}
+	}
+
+	var RenderGraph = function(percents) {
+		var marketgraph = $("#marketgraph");
+		$.plot(marketgraph, percents, { 
+			series: { lines: { show: true }, points: { show: true } },
+			xaxis: {min:0, max:6},
+			yaxis: {min:0, max:100},
+			grid: { hoverable: true }
+		});
+		marketgraph.bind("plothover", PlotHoverEvent);
+	}
+
 	var DisplayUI = function() {
 		if (days >= CONFIG.vars.MAX_DAYS)
 			$('#nextday').hide();
@@ -199,7 +236,8 @@ RunGame = function() {
 				color: itemDef.color,
 				pct: pct,
 				xchg: market.exchange[i],
-				n: (player.inventory[i] || 0)
+				n: (player.inventory[i] || 0),
+				itemIndex : ii
 			}));
 			var dadd = d.find("#add");
 			var dsub = d.find("#sub");
@@ -208,6 +246,9 @@ RunGame = function() {
 			dadd.on('mousedown', MakeBuyHandler(i, 1) );
 			dsub.on('mousedown', MakeBuyHandler(i,-1) );
 			marketdiv.append(d);
+			var MakeHoverHandler = function(i) { return function(e) {ItemHoverEvent(i, percents);};}
+			d.on('mouseenter', MakeHoverHandler(ii));
+			d.on('mouseleave', MakeHoverHandler(null));
 
 			var hist = [];
 			for (var j = 0; j < market.history.length; ++j) {
@@ -220,11 +261,9 @@ RunGame = function() {
 		var d = '<div><p> Money: ' + player.money + ' - days: ' + days + '</p></div>';
 		summarydiv.append(d);
 
-		$.plot($("#marketgraph"), percents, { 
-			series: { lines: { show: true }, points: { show: true } },
-			xaxis: {min:0, max:6},
-			yaxis: {min:0, max:100}
-		});
+		lastHighlightedItem = null;
+		lastHighlightedGraph = null;
+		RenderGraph(percents);
 	}
 
 	var NextDay = function() {
