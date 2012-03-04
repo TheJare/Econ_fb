@@ -168,52 +168,61 @@ RunGame = function() {
 	var market = new Market();
 	var days = 1;
 
-	var BuyItemEvent = function(i, v) {
-		player.AddItem(market, i, v);
+	var BuyItemEvent = function(itemIndex, itemName, v) {
+		player.AddItem(market, itemName, v);
 		if (!CONFIG.vars.hasWon) {
 			if (player.money >= CONFIG.vars.MAX_MONEY) {
 				CONFIG.vars.hasWon = true;
 				$('#winMessage').show();
 			}
 		}
-		setTimeout(DisplayUI, 1);
+		$("#itemmarketplayerinv_"+itemIndex).text('('+player.inventory[itemName]+')');
+		$("#playermoney").text(player.money);
 	}
 
-	var HighlightItem = function(itemIndex, enabled) {
-		var line = $("#itemmarketline_"+itemIndex);
-		line.css("background-color", enabled?"#124":"#000");
-	};
-
 	var lastHighlightedItem = null;
-	var lastHighlightedGraph = null;
-	var PlotHoverEvent = function (event, pos, item) {
+	var PlotHoverEvent = function (evt, pos, item, percents) {
 		if (lastHighlightedItem !== null) {
-			HighlightItem(lastHighlightedItem, false);
+			lastHighlightedItem.removeClass('itemmarketline_hover');
 			lastHighlightedItem = null;
 		}
 		if (item) {
-			HighlightItem(item.seriesIndex, true);
-			lastHighlightedItem = item.seriesIndex;
+			lastHighlightedItem = $('#itemmarketline_'+percents[item.seriesIndex].myItemIndex);
+			lastHighlightedItem.addClass('itemmarketline_hover');
 		}
 	}
-	var ItemHoverEvent = function (itemIndex, percents) {
+	var ItemHoverEvent = function (evt, percents, itemIndex) {
 		if (itemIndex !== null) {
 			var localpercents = [percents[itemIndex]];
-			RenderGraph(localpercents);
+			RenderGraph(localpercents, percents);
+			$(evt.target.parentNode).addClass('itemmarketline_hover');
 		} else {
-			RenderGraph(percents);
+			RenderGraph(percents, percents);
+			$(evt.target.parentNode).removeClass('itemmarketline_hover');
 		}
 	}
 
-	var RenderGraph = function(percents) {
+	var RenderGraph = function(percentsToRender, percents) {
 		var marketgraph = $("#marketgraph");
-		$.plot(marketgraph, percents, { 
+		$.plot(marketgraph, percentsToRender, { 
 			series: { lines: { show: true }, points: { show: true } },
 			xaxis: {min:0, max:6},
 			yaxis: {min:0, max:100},
 			grid: { hoverable: true }
 		});
-		marketgraph.bind("plothover", PlotHoverEvent);
+		marketgraph.off("plothover");
+		marketgraph.on("plothover", function(event, pos, item) { PlotHoverEvent(event, pos, item, percents);});
+	}
+
+	var ProcessMarket = function(cb) {
+		for (var itemIndex in ItemDefs) {
+			var itemName = ItemDefs[itemIndex][0];
+			var itemDef = ItemDefs[itemIndex][1];
+			var playerInv = (player.inventory[itemName] || 0);
+			var marketValue = market.exchange[itemName];
+			if (cb(itemIndex, itemName, itemDef, playerInv, marketValue) === false)
+				break;
+		}
 	}
 
 	var DisplayUI = function() {
@@ -225,45 +234,59 @@ RunGame = function() {
 		marketdiv.empty();
 		summarydiv.empty();
 
-		//var estimatedMoney = player.money + 
-		
-		var percents = [];
-		for (var ii in ItemDefs) {
-			var i = ItemDefs[ii][0];
-			var itemDef = ItemDefs[ii][1];
-			var pct = Math.floor((market.exchange[i] - itemDef.min) * 100 / (itemDef.max-itemDef.min));
-			var d = $(CONFIG.vars.ejsMarketBuySellLine.render({
-				color: itemDef.color,
-				pct: pct,
-				xchg: market.exchange[i],
-				n: (player.inventory[i] || 0),
-				itemIndex : ii
-			}));
-			var dadd = d.find("#add");
-			var dsub = d.find("#sub");
-			// Function to make a closure bound to the current value of loop variable
-			var MakeBuyHandler = function(i, n) { return function(e) {BuyItemEvent(i, n);e.preventDefault();};}
-			dadd.on('mousedown', MakeBuyHandler(i, 1) );
-			dsub.on('mousedown', MakeBuyHandler(i,-1) );
-			marketdiv.append(d);
-			var MakeHoverHandler = function(i) { return function(e) {ItemHoverEvent(i, percents);};}
-			d.on('mouseenter', MakeHoverHandler(ii));
-			d.on('mouseleave', MakeHoverHandler(null));
+		var estimatedMoney = player.money;
+		ProcessMarket(function(itemIndex, itemName, itemDef, playerInv, marketValue) {
+			estimatedMoney += playerInv*marketValue;
+		});
 
+		var percents = [];
+		var percentsToRender = [];
+		ProcessMarket(function(itemIndex, itemName, itemDef, playerInv, marketValue) {
+			if (marketValue > estimatedMoney)
+				return false;
+
+			var pct = Math.floor((marketValue - itemDef.min) * 100 / (itemDef.max-itemDef.min));
+			// Compute history for this item's graph and store in percents[]
 			var hist = [];
 			for (var j = 0; j < market.history.length; ++j) {
-				var val = market.history[j][i];
+				var val = market.history[j][itemName];
 				var valpct = (val - itemDef.min) * 100 / (itemDef.max-itemDef.min);
 				hist.push([j, valpct]);
 			}
-			percents.push( { color: itemDef.color, data: hist });
-		}
-		var d = '<div><p> Money: ' + player.money + ' - days: ' + days + '</p></div>';
+			var graphLine = { color: itemDef.color, data: hist, myItemName: itemName, myItemIndex:itemIndex };
+			percents.push(graphLine);
+
+			// If we don't want to render this item, then we're done for this iteration.
+			if (playerInv == 0 && itemDef.max*10 < estimatedMoney/20)
+				return;
+
+			var d = $(CONFIG.vars.ejsMarketBuySellLine.render({
+				color: itemDef.color,
+				pct: pct,
+				xchg: marketValue,
+				n: playerInv,
+				itemIndex : itemIndex
+			}));
+
+			var dadd = d.find("#add");
+			var dsub = d.find("#sub");
+			// Function to make a closure bound to the current value of loop variable
+			var MakeBuyHandler = function(n) { return function(e) {BuyItemEvent(itemIndex, itemName, n);e.preventDefault();};}
+			dadd.on('mousedown', MakeBuyHandler( 1) );
+			dsub.on('mousedown', MakeBuyHandler(-1) );
+			marketdiv.append(d);
+			var MakeHoverHandler = function(itemIndex) { return function(evt) {ItemHoverEvent(evt, percents, itemIndex);};}
+			d.on('mouseenter', MakeHoverHandler(itemIndex));
+			d.on('mouseleave', MakeHoverHandler(null));
+
+			percentsToRender.push(graphLine);
+		});
+		var d = '<div><p> Money: <span id="playermoney">' + player.money + '</span> - days: ' + days + '</p></div>';
 		summarydiv.append(d);
 
 		lastHighlightedItem = null;
 		lastHighlightedGraph = null;
-		RenderGraph(percents);
+		RenderGraph(percentsToRender, percents);
 	}
 
 	var NextDay = function() {
