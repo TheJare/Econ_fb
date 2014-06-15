@@ -6,11 +6,23 @@
 Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
 */
 
-FB_Init = function(app_id, fb_channel, cb) {
-
+FB_LoadSDK = function() {
 	var fb_root = document.createElement('div');
 	fb_root.id = "fb-root";
 	document.body.appendChild(fb_root);
+
+	// Load the SDK Asynchronously
+	(function(d){
+		 var js, id = 'facebook-jssdk'; if (d.getElementById(id)) {return;}
+		 js = d.createElement('script'); js.id = id; js.async = true;
+		 js.src = "//connect.facebook.net/en_US/all.js";
+		 d.getElementsByTagName('head')[0].appendChild(js);
+	 }(document));
+}
+
+FB_Init = function(app_id, fb_channel, cb) {
+
+	FB_LoadSDK();
 
 	window.fbAsyncInit = function() {
 		FB.init({
@@ -32,12 +44,6 @@ FB_Init = function(app_id, fb_channel, cb) {
 			});
 		});
 	};
-  
-	// Load the SDK Asynchronously
-	(function(d){
-		 var js, id = 'facebook-jssdk'; if (d.getElementById(id)) {return;}
-		 js = d.createElement('script'); js.id = id; js.async = true;
-		 js.src = "//connect.facebook.net/en_US/all.js";
-		 d.getElementsByTagName('head')[0].appendChild(js);
-	 }(document));
+
+
 }

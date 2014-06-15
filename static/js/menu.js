@@ -8,7 +8,10 @@ EnterMenu = function() {
 			LoadMenu(function(err, vars) { CONFIG.vars = vars; callback(err, vars);});
 		},
 		function(callback) {
-			FB.api('/'+CONFIG.me.id+'/picture', function(pic) { CONFIG.me_pic = pic; callback(null, pic);});
+			//FB.api('/'+CONFIG.me.id+'/picture', function(pic) { CONFIG.me_pic = pic; callback(null, pic);});
+			var pic = 'https://graph.facebook.com/' + CONFIG.me.id + '/picture';
+			CONFIG.me_pic = pic;
+			callback(null, pic);
 		},
 		function(callback) {
 			$("#uicontainer").fadeOut('slow', function() { callback(null); });

@@ -44,7 +44,7 @@ exports.index = function(req, res) {
 		+ "\n  cookies: " + JSON.stringify(req.cookies)
 		+ "\n  request keys: " + JSON.stringify(Object.keys(req)));*/
 
-	var payload = FB.MainPageFlow(CONFIG, req, res);
+	var payload = FB.CanvasPageFlow(CONFIG, req, res);
 	if (!payload)
 		return;
 
